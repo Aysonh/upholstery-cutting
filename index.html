@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SofaCut">
+    <title>SofaCut Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); 
+            color: #fff;
+            overscroll-behavior: none;
+            min-height: 100vh;
+        }
+        .ios-btn { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            border-radius: 14px; 
+            padding: 18px;
+            font-weight: 600;
+            font-size: 17px;
+            border: none;
+            width: 100%;
+            -webkit-appearance: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+        .ios-btn:active { 
+            transform: scale(0.96); 
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        .ios-card { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; 
+            margin: 12px 0;
+            transition: transform 0.2s;
+        }
+        .ios-card:active {
+            transform: scale(0.99);
+        }
+        .ios-input { 
+            background: rgba(0, 0, 0, 0.3); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: white;
+            padding: 14px 16px;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 17px;
+            -webkit-appearance: none;
+            transition: all 0.3s;
+        }
+        .ios-input:focus {
+            border-color: #667eea;
+            background: rgba(0, 0, 0, 0.4);
+            outline: none;
+        }
+        .ios-segment {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .ios-segment-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 8px;
+            color: #8b92b4;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .ios-segment-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        .safe-top { padding-top: max(20px, env(safe-area-inset-top)); }
+        .safe-bottom { padding-bottom: max(30px, env(safe-area-inset-bottom)); }
+        .modal { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.85); 
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: linear-gradient(180deg, #1e1e2e 0%, #1a1a2e 100%);
+            border-radius: 24px 24px 0 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .stepper {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .stepper button {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: transparent;
+            color: #667eea;
+            font-size: 24px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .stepper button:active { background: rgba(102, 126, 234, 0.2); border-radius: 12px; }
+        .stepper span {
+            min-width: 50px;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .toggle-switch {
+            width: 52px;
+            height: 32px;
+            background: #4a5568;
+            border-radius: 16px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .toggle-switch.active {
+            background: #48bb78;
+        }
+        .toggle-switch .knob {
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .toggle-switch.active .knob {
+            transform: translateX(20px);
+        }
+        .lang-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .grain-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(102, 126, 234, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #a3bffa;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+        .grain-arrow {
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+        .grain-vertical .grain-arrow {
+            transform: rotate(90deg);
+        }
+        .section-title {
+            color: #a0aec0;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+        .preview-canvas {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .layout-canvas {
+            background: #f7fafc !important;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .color-blue { color: #63b3ed; }
+        .color-purple { color: #b794f4; }
+        .color-green { color: #68d391; }
+        .color-orange { color: #f6ad55; }
+        .color-pink { color: #f687b3; }
+        .bg-blue-soft { background: rgba(99, 179, 237, 0.15); border: 1px solid rgba(99, 179, 237, 0.3); }
+        .bg-purple-soft { background: rgba(183, 148, 244, 0.15); border: 1px solid rgba(183, 148, 244, 0.3); }
+        .bg-green-soft { background: rgba(104, 211, 145, 0.15); border: 1px solid rgba(104, 211, 145, 0.3); }
+        .bg-yellow-soft { background: rgba(246, 173, 85, 0.15); border: 1px solid rgba(246, 173, 85, 0.3); }
+        .bg-orange-soft { background: rgba(237, 137, 54, 0.15); border: 1px solid rgba(237, 137, 54, 0.3); }
+        .bg-pink-soft { background: rgba(246, 135, 179, 0.15); border: 1px solid rgba(246, 135, 179, 0.3); }
+    </style>
+</head>
+<body class="safe-top safe-bottom">
+
+    <!-- 安裝提示 -->
+    <div id="installTip" class="fixed top-0 left-0 right-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 z-50 hidden shadow-lg">
+        <div class="flex justify-between items-center max-w-md mx-auto">
+            <div>
+                <div class="font-bold" data-i18n="installTitle">安裝 SofaCut 到主屏幕</div>
+                <div class="text-sm opacity-90" data-i18n="installDesc">分享按鈕 → 加入主畫面</div>
+            </div>
+            <button onclick="hideInstall()" class="text-white opacity-80 hover:opacity-100 text-xl">✕</button>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto px-4 pb-32">
+
+        <!-- 標題與語言 -->
+        <div class="flex justify-between items-start py-4 mb-2">
+            <div>
+                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">SofaCut</h1>
+                <p class="text-gray-400 text-sm mt-1" data-i18n="subtitle">專業沙發剪裁排版</p>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+                <button onclick="toggleLanguage()" class="lang-btn flex items-center gap-2">
+                    <span id="langIcon">🇭🇰</span>
+                    <span id="langText">中文</span>
+                </button>
+                <div class="grain-indicator" id="grainIndicator" onclick="toggleGrain()">
+                    <span class="grain-arrow" id="grainArrow">↑</span>
+                    <span id="grainText" data-i18n="grainVertical">直向經紗</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 單位 -->
+        <div class="ios-segment mb-6">
+            <div class="ios-segment-item active" onclick="setUnit('cm', this)" data-i18n="unitCM">厘米 CM</div>
+            <div class="ios-segment-item" onclick="setUnit('inch', this)" data-i18n="unitINCH">英吋 INCH</div>
+        </div>
+
+        <!-- 主要尺寸 -->
+        <div class="ios-card p-5">
+            <h3 class="section-title" data-i18n="mainDimensions">主要尺寸</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs text-gray-400 block mb-2 font-medium" data-i18n="totalWidth">總寬度</label>
+                    <input type="number" id="width" class="ios-input" value="200" placeholder="200">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 block mb-2 font-medium" data-i18n="totalDepth">總深度</label>
+                    <input type="number" id="depth" class="ios-input" value="90" placeholder="90">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 block mb-2 font-medium" data-i18n="totalHeight">總高度</label>
+                    <input type="number" id="height" class="ios-input" value="85" placeholder="85">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 block mb-2 font-medium" data-i18n="seatHeight">座高</label>
+                    <input type="number" id="seatHeight" class="ios-input" value="45" placeholder="45">
+                </div>
+            </div>
+        </div>
+
+        <!-- 座位類型 -->
+        <div class="ios-card p-5">
+            <h3 class="section-title" data-i18n="seatType">座位類型</h3>
+            <div class="ios-segment mb-4">
+                <div class="ios-segment-item active" onclick="setSeat('tight', this)" data-i18n="tight">緊貼 Tight</div>
+                <div class="ios-segment-item" onclick="setSeat('loose', this)" data-i18n="loose">鬆軟 Loose</div>
+            </div>
+            
+            <div id="looseSeatPanel" class="hidden bg-blue-soft rounded-xl p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="color-blue font-semibold" data-i18n="cushionSettings">坐墊設定</span>
+                    <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                        <div class="knob"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="width">寬</label>
+                        <input type="number" id="cushionW" class="ios-input text-sm py-2" value="60" placeholder="寬">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="depth">深</label>
+                        <input type="number" id="cushionD" class="ios-input text-sm py-2" value="55" placeholder="深">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="qty">數量</label>
+                        <div class="stepper">
+                            <button onclick="changeQty('cushionQty', -1)">−</button>
+                            <span id="cushionQty">2</span>
+                            <button onclick="changeQty('cushionQty', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 靠背類型 -->
+        <div class="ios-card p-5">
+            <h3 class="section-title" data-i18n="backType">靠背類型</h3>
+            <div class="ios-segment mb-4">
+                <div class="ios-segment-item active" onclick="setBack('tight', this)" data-i18n="tight">緊貼 Tight</div>
+                <div class="ios-segment-item" onclick="setBack('loose', this)" data-i18n="loose">鬆軟 Loose</div>
+            </div>
+            
+            <div id="looseBackPanel" class="hidden bg-pink-soft rounded-xl p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="color-pink font-semibold" data-i18n="backCushionSettings">靠背墊設定</span>
+                    <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                        <div class="knob"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="width">寬</label>
+                        <input type="number" id="backCushionW" class="ios-input text-sm py-2" value="55" placeholder="寬">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="height">高</label>
+                        <input type="number" id="backCushionH" class="ios-input text-sm py-2" value="40" placeholder="高">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="qty">數量</label>
+                        <div class="stepper">
+                            <button onclick="changeQty('backCushionQty', -1)">−</button>
+                            <span id="backCushionQty">2</span>
+                            <button onclick="changeQty('backCushionQty', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 扶手 -->
+        <div class="ios-card p-5">
+            <h3 class="section-title" data-i18n="armConfig">扶手配置</h3>
+            <div class="bg-gray-800/50 rounded-xl p-4 mb-4 border border-white/5">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="font-semibold text-gray-200" data-i18n="innerArm">內側扶手</span>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="checkbox" id="armLeft" checked class="w-5 h-5 rounded bg-blue-500 border-none accent-blue-500">
+                            <span data-i18n="left">左</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="checkbox" id="armRight" checked class="w-5 h-5 rounded bg-blue-500 border-none accent-blue-500">
+                            <span data-i18n="right">右</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="width">寬</label>
+                        <input type="number" id="armW" class="ios-input text-sm py-2" value="15" placeholder="寬">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="height">高</label>
+                        <input type="number" id="armH" class="ios-input text-sm py-2" value="60" placeholder="高">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="depth">深</label>
+                        <input type="number" id="armD" class="ios-input text-sm py-2" value="90" placeholder="深">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-yellow-soft rounded-xl p-4 mb-4">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="color-orange font-semibold" data-i18n="outerArm">外側扶手</span>
+                    <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                        <div class="knob"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="width">寬</label>
+                        <input type="number" id="outArmW" class="ios-input text-sm py-2" value="2" placeholder="寬">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="height">高</label>
+                        <input type="number" id="outArmH" class="ios-input text-sm py-2" value="60" placeholder="高">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-orange-soft rounded-xl p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-orange-400 font-semibold" data-i18n="outerBack">外側靠背</span>
+                    <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                        <div class="knob"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="width">寬</label>
+                        <input type="number" id="outBackW" class="ios-input text-sm py-2" value="3" placeholder="寬">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1" data-i18n="height">高</label>
+                        <input type="number" id="outBackH" class="ios-input text-sm py-2" value="40" placeholder="高">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 邊框與滾邊 -->
+        <div class="ios-card p-5">
+            <h3 class="section-title" data-i18n="decoration">裝飾細節</h3>
+            
+            <div class="flex justify-between items-center bg-gray-800/50 p-4 rounded-xl mb-4 border border-white/5 cursor-pointer active:scale-95 transition-transform" onclick="openBorderModal()">
+                <div>
+                    <div class="font-semibold text-gray-200" data-i18n="border">邊框 Border</div>
+                    <div class="text-sm text-gray-400 mt-1" id="borderSummary">點擊設定 5 個尺寸</div>
+                </div>
+                <span class="text-blue-400 text-2xl">›</span>
+            </div>
+            
+            <div class="flex justify-between items-center bg-gray-800/50 p-4 rounded-xl border border-white/5 cursor-pointer active:scale-95 transition-transform" onclick="openPipingModal()">
+                <div>
+                    <div class="font-semibold text-gray-200" data-i18n="piping">滾邊 Piping</div>
+                    <div class="text-sm text-gray-400 mt-1" id="pipingSummary">點擊設定 5 個尺寸</div>
+                </div>
+                <span class="text-blue-400 text-2xl">›</span>
+            </div>
+        </div>
+
+        <!-- 3D 預覽 -->
+        <div class="ios-card p-5">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="section-title mb-0" data-i18n="preview3d">3D 預覽</h3>
+                <div class="flex gap-2">
+                    <button onclick="rotate(-30)" class="w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-xl flex items-center justify-center text-xl transition-colors">←</button>
+                    <button onclick="rotate(30)" class="w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-xl flex items-center justify-center text-xl transition-colors">→</button>
+                </div>
+            </div>
+            <canvas id="preview3d" class="w-full h-56 preview-canvas"></canvas>
+        </div>
+
+        <!-- 生成按鈕 -->
+        <button onclick="generate()" class="ios-btn fixed bottom-6 left-4 right-4 shadow-2xl z-40" style="max-width:  calc(100% - 32px); margin: 0 auto;">
+            <span data-i18n="generateLayout">生成剪裁佈局圖</span>
+        </button>
+
+    </div>
+
+    <!-- Border 模態框 -->
+    <div id="borderModal" class="modal">
+        <div class="modal-content p-5">
+            <div class="flex justify-between items-center mb-6 pt-2">
+                <h3 class="text-2xl font-bold" data-i18n="borderSettings">邊框尺寸設定</h3>
+                <button onclick="closeBorderModal()" class="text-blue-400 font-semibold text-lg hover:text-blue-300" data-i18n="done">完成</button>
+            </div>
+            <div id="borderList" class="space-y-4 pb-4"></div>
+            <button onclick="addBorder()" id="addBorderBtn" class="w-full py-4 border-2 border-dashed border-gray-600 rounded-xl text-gray-400 font-semibold mb-4 hover:border-blue-500 hover:text-blue-400 transition-colors">
+                + <span data-i18n="addBorder">添加邊框尺寸</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Piping 模態框 -->
+    <div id="pipingModal" class="modal">
+        <div class="modal-content p-5">
+            <div class="flex justify-between items-center mb-6 pt-2">
+                <h3 class="text-2xl font-bold" data-i18n="pipingSettings">滾邊尺寸設定</h3>
+                <button onclick="closePipingModal()" class="text-blue-400 font-semibold text-lg hover:text-blue-300" data-i18n="done">完成</button>
+            </div>
+            
+            <div class="ios-segment mb-6">
+                <div class="ios-segment-item active" onclick="setPipingDir('straight', this)" data-i18n="straight">直線 Straight</div>
+                <div class="ios-segment-item" onclick="setPipingDir('bias', this)" data-i18n="bias">斜線 Bias</div>
+            </div>
+            
+            <div id="pipingList" class="space-y-4 pb-4"></div>
+            <button onclick="addPiping()" id="addPipingBtn" class="w-full py-4 border-2 border-dashed border-gray-600 rounded-xl text-gray-400 font-semibold mb-4 hover:border-pink-500 hover:text-pink-400 transition-colors">
+                + <span data-i18n="addPiping">添加滾邊尺寸</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 佈局圖模態框 -->
+    <div id="layoutModal" class="fixed inset-0 bg-gray-900 z-50 hidden flex flex-col">
+        <div class="bg-gray-800 px-4 py-4 flex justify-between items-center border-b border-gray-700 shadow-lg">
+            <div>
+                <h3 class="font-bold text-lg" data-i18n="cuttingLayout">剪裁佈局圖</h3>
+                <p class="text-sm text-gray-400 mt-1" id="layoutInfo">計算中...</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="shareLayout()" class="text-blue-400 hover:text-blue-300 transition-colors">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                </button>
+                <button onclick="closeLayoutModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="flex-1 overflow-auto bg-gray-100 p-4">
+            <canvas id="layoutCanvas" class="layout-canvas shadow-lg"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // 多語言支持
+        const i18n = {
+            zh: {
+                subtitle: '專業沙發剪裁排版',
+                installTitle: '安裝 SofaCut 到主屏幕',
+                installDesc: '分享按鈕 → 加入主畫面',
+                grainVertical: '直向經紗',
+                grainHorizontal: '橫向緯紗',
+                unitCM: '厘米 CM',
+                unitINCH: '英吋 INCH',
+                mainDimensions: '主要尺寸',
+                totalWidth: '總寬度',
+                totalDepth: '總深度',
+                totalHeight: '總高度',
+                seatHeight: '座高',
+                seatType: '座位類型',
+                tight: '緊貼 Tight',
+                loose: '鬆軟 Loose',
+                cushionSettings: '坐墊設定',
+                width: '寬',
+                depth: '深',
+                height: '高',
+                qty: '數量',
+                backType: '靠背類型',
+                backCushionSettings: '靠背墊設定',
+                armConfig: '扶手配置',
+                innerArm: '內側扶手',
+                left: '左',
+                right: '右',
+                outerArm: '外側扶手',
+                outerBack: '外側靠背',
+                decoration: '裝飾細節',
+                border: '邊框 Border',
+                piping: '滾邊 Piping',
+                preview3d: '3D 預覽',
+                generateLayout: '生成剪裁佈局圖',
+                borderSettings: '邊框尺寸設定',
+                pipingSettings: '滾邊尺寸設定',
+                done: '完成',
+                addBorder: '添加邊框尺寸',
+                addPiping: '添加滾邊尺寸',
+                straight: '直線 Straight',
+                bias: '斜線 Bias',
+                cuttingLayout: '剪裁佈局圖',
+                grainDir: '經向',
+                weftDir: '緯向',
+                length: '長度',
+                usage: '用量',
+                pieces: '件'
+            },
+            en: {
+                subtitle: 'Professional Sofa Cutting Layout',
+                installTitle: 'Install SofaCut to Home Screen',
+                installDesc: 'Share button → Add to Home Screen',
+                grainVertical: 'Vertical Grain',
+                grainHorizontal: 'Horizontal Weft',
+                unitCM: 'CM',
+                unitINCH: 'INCH',
+                mainDimensions: 'Main Dimensions',
+                totalWidth: 'Total Width',
+                totalDepth: 'Total Depth',
+                totalHeight: 'Total Height',
+                seatHeight: 'Seat Height',
+                seatType: 'Seat Type',
+                tight: 'Tight',
+                loose: 'Loose',
+                cushionSettings: 'Cushion Settings',
+                width: 'W',
+                depth: 'D',
+                height: 'H',
+                qty: 'Qty',
+                backType: 'Backrest Type',
+                backCushionSettings: 'Back Cushion Settings',
+                armConfig: 'Armrest Config',
+                innerArm: 'Inner Arm',
+                left: 'L',
+                right: 'R',
+                outerArm: 'Outer Arm',
+                outerBack: 'Outer Back',
+                decoration: 'Decoration',
+                border: 'Border',
+                piping: 'Piping',
+                preview3d: '3D Preview',
+                generateLayout: 'Generate Cutting Layout',
+                borderSettings: 'Border Settings',
+                pipingSettings: 'Piping Settings',
+                done: 'Done',
+                addBorder: 'Add Border Size',
+                addPiping: 'Add Piping Size',
+                straight: 'Straight',
+                bias: 'Bias',
+                cuttingLayout: 'Cutting Layout',
+                grainDir: 'Grain',
+                weftDir: 'Weft',
+                length: 'Length',
+                usage: 'Usage',
+                pieces: 'pcs'
+            }
+        };
+
+        // 數據
+        let app = {
+            lang: 'zh',
+            unit: 'cm',
+            seat: 'tight',
+            back: 'tight',
+            grain: 'vertical', // vertical 或 horizontal
+            rotation: 30,
+            pipingDir: 'straight',
+            borders: [{w: 5, l: 580, q: 1}],
+            pipings: [{w: 2, l: 750, q: 1}]
+        };
+
+        // 初始化
+        window.onload = function() {
+            draw3D();
+            renderBorderList();
+            renderPipingList();
+            updateSummaries();
+            updateLanguage();
+            
+            // 檢查是否已安裝
+            if (!window.navigator.standalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                setTimeout(() => {
+                    document.getElementById('installTip').classList.remove('hidden');
+                }, 2000);
+            }
+        };
+
+        function hideInstall() {
+            document.getElementById('installTip').classList.add('hidden');
+        }
+
+        // 語言切換
+        function toggleLanguage() {
+            app.lang = app.lang === 'zh' ? 'en' : 'zh';
+            document.getElementById('langIcon').textContent = app.lang === 'zh' ? '🇭🇰' : '🇬🇧';
+            document.getElementById('langText').textContent = app.lang === 'zh' ? '中文' : 'English';
+            updateLanguage();
+        }
+
+        function updateLanguage() {
+            const texts = i18n[app.lang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (texts[key]) el.textContent = texts[key];
+            });
+            updateGrainDisplay();
+        }
+
+        // 布料方向切換
+        function toggleGrain() {
+            app.grain = app.grain === 'vertical' ? 'horizontal' : 'vertical';
+            updateGrainDisplay();
+            
+            // 視覺反饋
+            const indicator = document.getElementById('grainIndicator');
+            indicator.style.transform = 'scale(0.95)';
+            setTimeout(() => indicator.style.transform = 'scale(1)', 150);
+        }
+
+        function updateGrainDisplay() {
+            const indicator = document.getElementById('grainIndicator');
+            const arrow = document.getElementById('grainArrow');
+            const text = document.getElementById('grainText');
+            
+            if (app.grain === 'vertical') {
+                indicator.classList.remove('grain-vertical');
+                text.textContent = i18n[app.lang].grainVertical;
+            } else {
+                indicator.classList.add('grain-vertical');
+                text.textContent = i18n[app.lang].grainHorizontal;
+            }
+        }
+
+        // 單位
+        function setUnit(u, el) {
+            app.unit = u;
+            el.parentElement.querySelectorAll('.ios-segment-item').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // 類型
+        function setSeat(t, el) {
+            app.seat = t;
+            el.parentElement.querySelectorAll('.ios-segment-item').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('looseSeatPanel').classList.toggle('hidden', t === 'tight');
+        }
+
+        function setBack(t, el) {
+            app.back = t;
+            el.parentElement.querySelectorAll('.ios-segment-item').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('looseBackPanel').classList.toggle('hidden', t === 'tight');
+        }
+
+        // Switch
+        function toggleSwitch(el) {
+            el.classList.toggle('active');
+        }
+
+        // Qty
+        function changeQty(id, delta) {
+            const el = document.getElementById(id);
+            let v = parseInt(el.textContent) + delta;
+            if (v < 1) v = 1;
+            if (v > 5) v = 5;
+            el.textContent = v;
+        }
+
+        // 3D
+        function rotate(deg) {
+            app.rotation += deg;
+            draw3D();
+        }
+
+        function draw3D() {
+            const c = document.getElementById('preview3d');
+            const ctx = c.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = c.getBoundingClientRect();
+            
+            c.width = rect.width * dpr;
+            c.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const cx = rect.width / 2;
+            const cy = rect.height / 2 + 30;
+            
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            ctx.save();
+            ctx.translate(cx, cy);
+            
+            const rot = app.rotation * Math.PI / 180;
+            const cos = Math.cos(rot);
+            const sin = Math.sin(rot);
+            
+            function box(x, y, z, bw, bh, bd, c) {
+                const x1 = (x - bw/2) * cos - (z - bd/2) * sin;
+                const x2 = (x + bw/2) * cos - (z - bd/2) * sin;
+                const x3 = (x + bw/2) * cos - (z + bd/2) * sin;
+                const x4 = (x - bw/2) * cos - (z + bd/2) * sin;
+                const y0 = -y, y1 = -(y + bh);
+                const zf = 0.35;
+                
+                ctx.fillStyle = c[2];
+                ctx.beginPath();
+                ctx.moveTo(x1, y1 + (x*sin+(z-bd/2)*cos)*zf);
+                ctx.lineTo(x2, y1 + (x*sin+(z-bd/2)*cos)*zf);
+                ctx.lineTo(x3, y1 + (x*sin+(z+bd/2)*cos)*zf);
+                ctx.lineTo(x4, y1 + (x*sin+(z+bd/2)*cos)*zf);
+                ctx.closePath(); ctx.fill();
+                
+                ctx.fillStyle = c[0];
+                ctx.beginPath();
+                ctx.moveTo(x1, y0 + (x*sin+(z-bd/2)*cos)*zf);
+                ctx.lineTo(x2, y0 + (x*sin+(z-bd/2)*cos)*zf);
+                ctx.lineTo(x2, y1 + (x*sin+(z-bd/2)*cos)*zf);
+                ctx.lineTo(x1, y1 + (x*sin+(z-bd/2)*cos)*zf);
+                ctx.closePath(); ctx.fill();
+                
+                ctx.fillStyle = c[1];
+                ctx.beginPath();
+                ctx.moveTo(x2, y0 + (x*sin+(z-bd/2)*cos)*zf);
+                ctx.lineTo(x3, y0 + (x*sin+(z+bd/2)*cos)*zf);
+                ctx.lineTo(x3, y1 + (x*sin+(z+bd/2)*cos)*zf);
+                ctx.lineTo(x2, y1 + (x*sin+(z-bd/2)*cos)*zf);
+                ctx.closePath(); ctx.fill();
+            }
+            
+            // 底座
+            box(0, 0, 0, 140, 12, 70, ['#4a5568', '#2d3748', '#718096']);
+            // 座位
+            const seatColor = app.seat === 'tight' ? ['#4299e1', '#2b6cb0', '#63b3ed'] : ['#667eea', '#5a67d8', '#7c9bf5'];
+            box(0, 12, 7, 110, 20, 55, seatColor);
+            // 靠背
+            const backColor = app.back === 'tight' ? ['#4299e1', '#2b6cb0', '#63b3ed'] : ['#667eea', '#5a67d8', '#7c9bf5'];
+            box(0, 12, -20, 140, 30, 15, backColor);
+            // 扶手
+            box(-58, 12, 0, 20, 45, 70, ['#48bb78', '#38a169', '#68d391']);
+            box(58, 12, 0, 20, 45, 70, ['#48bb78', '#38a169', '#68d391']);
+            
+            ctx.restore();
+        }
+
+        // Border
+        function openBorderModal() {
+            document.getElementById('borderModal').classList.add('show');
+            renderBorderList();
+        }
+
+        function closeBorderModal() {
+            document.getElementById('borderModal').classList.remove('show');
+            updateSummaries();
+        }
+
+        function renderBorderList() {
+            const container = document.getElementById('borderList');
+            container.innerHTML = '';
+            app.borders.forEach((b, i) => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-800/50 rounded-xl p-4 border border-white/5';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-bold text-orange-400">${i18n[app.lang].border} #${i+1}</span>
+                        ${app.borders.length > 1 ? `<button onclick="removeBorder(${i})" class="text-red-400 text-sm hover:text-red-300 font-medium">${app.lang === 'zh' ? '刪除' : 'Delete'}</button>` : ''}
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">${i18n[app.lang].width}</label>
+                            <input type="number" value="${b.w}" onchange="updateBorder(${i}, 'w', this.value)" class="ios-input text-sm py-2">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">${i18n[app.lang].length}</label>
+                            <input type="number" value="${b.l}" onchange="updateBorder(${i}, 'l', this.value)" class="ios-input text-sm py-2">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">${i18n[app.lang].qty}</label>
+                            <input type="number" value="${b.q}" onchange="updateBorder(${i}, 'q', this.value)" class="ios-input text-sm py-2" min="1">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            document.getElementById('addBorderBtn').style.display = app.borders.length >= 5 ? 'none' : 'block';
+        }
+
+        function addBorder() {
+            if (app.borders.length >= 5) return;
+            app.borders.push({w: 5, l: 200, q: 1});
+            renderBorderList();
+        }
+
+        function removeBorder(i) {
+            app.borders.splice(i, 1);
+            renderBorderList();
+        }
+
+        function updateBorder(i, f, v) {
+            app.borders[i][f] = parseFloat(v) || 0;
+        }
+
+        // Piping
+        function openPipingModal() {
+            document.getElementById('pipingModal').classList.add('show');
+            renderPipingList();
+        }
+
+        function closePipingModal() {
+            document.getElementById('pipingModal').classList.remove('show');
+            updateSummaries();
+        }
+
+        function setPipingDir(d, el) {
+            app.pipingDir = d;
+            el.parentElement.querySelectorAll('.ios-segment-item').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function renderPipingList() {
+            const container = document.getElementById('pipingList');
+            container.innerHTML = '';
+            app.pipings.forEach((p, i) => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-800/50 rounded-xl p-4 border border-white/5';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-bold text-pink-400">${i18n[app.lang].piping} #${i+1}</span>
+                        ${app.pipings.length > 1 ? `<button onclick="removePiping(${i})" class="text-red-400 text-sm hover:text-red-300 font-medium">${app.lang === 'zh' ? '刪除' : 'Delete'}</button>` : ''}
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">${i18n[app.lang].width}</label>
+                            <input type="number" value="${p.w}" onchange="updatePiping(${i}, 'w', this.value)" class="ios-input text-sm py-2">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">${i18n[app.lang].length}</label>
+                            <input type="number" value="${p.l}" onchange="updatePiping(${i}, 'l', this.value)" class="ios-input text-sm py-2">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">${i18n[app.lang].qty}</label>
+                            <input type="number" value="${p.q}" onchange="updatePiping(${i}, 'q', this.value)" class="ios-input text-sm py-2" min="1">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            document.getElementById('addPipingBtn').style.display = app.pipings.length >= 5 ? 'none' : 'block';
+        }
+
+        function addPiping() {
+            if (app.pipings.length >= 5) return;
+            app.pipings.push({w: 2, l: 300, q: 1});
+            renderPipingList();
+        }
+
+        function removePiping(i) {
+            app.pipings.splice(i, 1);
+            renderPipingList();
+        }
+
+        function updatePiping(i, f, v) {
+            app.pipings[i][f] = parseFloat(v) || 0;
+        }
+
+        function updateSummaries() {
+            const bTotal = app.borders.reduce((a, b) => a + b.q, 0);
+            document.getElementById('borderSummary').textContent = 
+                app.lang === 'zh' ? `${app.borders.length} 個尺寸 · 共 ${bTotal} 條` : `${app.borders.length} sizes · ${bTotal} pcs`;
+            
+            const pTotal = app.pipings.reduce((a, p) => a + p.q, 0);
+            const dir = app.pipingDir === 'straight' ? (app.lang === 'zh' ? '直線' : 'Straight') : (app.lang === 'zh' ? '斜線' : 'Bias');
+            document.getElementById('pipingSummary').textContent = 
+                app.lang === 'zh' ? `${app.pipings.length} 個尺寸 · 共 ${pTotal} 條 · ${dir}` : `${app.pipings.length} sizes · ${pTotal} pcs · ${dir}`;
+        }
+
+        // 生成佈局圖
+        function generate() {
+            const w = parseFloat(document.getElementById('width').value) || 200;
+            const d = parseFloat(document.getElementById('depth').value) || 90;
+            const h = parseFloat(document.getElementById('height').value) || 85;
+            const sh = parseFloat(document.getElementById('seatHeight').value) || 45;
+            
+            document.getElementById('layoutModal').classList.remove('hidden');
+            
+            const c = document.getElementById('layoutCanvas');
+            const ctx = c.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            
+            const fabricW = 140;
+            const scale = 3;
+            const seam = 2;
+            const padding = 30;
+            
+            // 收集部件
+            const parts = [];
+            const bh = h - sh;
+            
+            // 根據紋向決定尺寸解釋
+            const isVertical = app.grain === 'vertical';
+            
+            // 主體
+            if (app.back === 'tight') {
+                parts.push({n: 'Backrest', w: w, h: bh, c: '#3182ce'});
+            } else {
+                parts.push({n: 'BackFrame', w: w, h: bh * 0.4, c: '#3182ce'});
+            }
+            
+            parts.push({n: 'Seat', w: w - 30, h: d * 0.6, c: '#805ad5'});
+            parts.push({n: 'SeatSide', w: sh, h: d * 0.6, c: '#3182ce', q: 2});
+            parts.push({n: 'ArmF', w: 15, h: 60, c: '#38a169', q: 2});
+            parts.push({n: 'ArmS', w: 90, h: 60, c: '#38a169', q: 2});
+            
+            // 邊框
+            app.borders.forEach((b, bi) => {
+                for (let i = 0; i < b.q; i++) {
+                    parts.push({n: `B${bi+1}-${i+1}`, w: b.w, h: b.l, c: '#dd6b20'});
+                }
+            });
+            
+            // 滾邊
+            app.pipings.forEach((p, pi) => {
+                for (let i = 0; i < p.q; i++) {
+                    parts.push({
+                        n: `P${pi+1}-${i+1}`, 
+                        w: p.w, 
+                        h: p.l, 
+                        c: '#e53e3e',
+                        bias: app.pipingDir === 'bias'
+                    });
+                }
+            });
+            
+            // 計算 - 考慮紋向
+            parts.forEach(p => {
+                // 如果橫向經紗，交換寬高以適應排版
+                let pw = p.w, ph = p.h;
+                if (!isVertical && p.w > p.h) {
+                    // 保持長邊沿布料長度方向
+                }
+                p.dw = (pw + seam * 2) * scale;
+                p.dh = (ph + seam * 2) * scale;
+            });
+            
+            // 排序策略：根據紋向決定
+            if (isVertical) {
+                parts.sort((a, b) => b.dh - a.dh); // 高優先
+            } else {
+                parts.sort((a, b) => b.dw - a.dw); // 寬優先
+            }
+            
+            const pos = [];
+            let cy = padding, rh = 0, cx = padding;
+            const fw = fabricW * scale;
+            
+            // 排版算法
+            parts.forEach(p => {
+                if (cx + p.dw > fw + padding) {
+                    cy += rh + 8;
+                    cx = padding;
+                    rh = 0;
+                }
+                pos.push({x: cx, y: cy, p: p});
+                rh = Math.max(rh, p.dh);
+                cx += p.dw + 8;
+            });
+            
+            const th = cy + rh + padding;
+            
+            c.width = (fw + padding * 2) * dpr;
+            c.height = th * dpr;
+            c.style.width = (fw + padding * 2) + 'px';
+            c.style.height = th + 'px';
+            ctx.scale(dpr, dpr);
+            
+            // 背景 - 清晰易看的淺色
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, fw + padding * 2, th);
+            
+            // 網格 - 更清晰的網格
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < fw + padding * 2; x += 20) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, th); ctx.stroke();
+            }
+            for (let y = 0; y < th; y += 20) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(fw + padding * 2, y); ctx.stroke();
+            }
+            
+            // 布料邊界
+            ctx.strokeStyle = '#2d3748';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(padding, padding, fw, th - padding * 2);
+            
+            // 紋向指示
+            ctx.fillStyle = '#2d3748';
+            ctx.font = 'bold 14px sans-serif';
+            const grainText = isVertical ? (app.lang === 'zh' ? '↑ 經向 (GRAIN)' : '↑ GRAIN') 
+                                         : (app.lang === 'zh' ? '→ 緯向 (WEFT)' : '→ WEFT');
+            ctx.fillText(grainText, padding + 10, padding - 10);
+            
+            // 繪製箭頭
+            ctx.strokeStyle = '#e53e3e';
+            ctx.lineWidth = 2;
+            if (isVertical) {
+                // 向上箭頭
+                ctx.beginPath();
+                ctx.moveTo(padding + fw - 30, padding - 15);
+                ctx.lineTo(padding + fw - 30, padding - 35);
+                ctx.moveTo(padding + fw - 35, padding - 30);
+                ctx.lineTo(padding + fw - 30, padding - 35);
+                ctx.lineTo(padding + fw - 25, padding - 30);
+                ctx.stroke();
+            } else {
+                // 向右箭頭
+                ctx.beginPath();
+                ctx.moveTo(padding + fw - 50, padding - 25);
+                ctx.lineTo(padding + fw - 30, padding - 25);
+                ctx.moveTo(padding + fw - 35, padding - 30);
+                ctx.lineTo(padding + fw - 30, padding - 25);
+                ctx.lineTo(padding + fw - 35, padding - 20);
+                ctx.stroke();
+            }
+            
+            // 部件
+            pos.forEach(o => {
+                const p = o.p;
+                
+                // 填充色 - 更鮮豔易看
+                ctx.fillStyle = p.c + '25';
+                ctx.fillRect(o.x, o.y, p.dw, p.dh);
+                
+                // 斜線紋理（如果是斜裁）
+                if (p.bias) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(o.x, o.y, p.dw, p.dh);
+                    ctx.clip();
+                    ctx.strokeStyle = p.c + '60';
+                    ctx.setLineDash([4, 4]);
+                    ctx.lineWidth = 1;
+                    for (let i = -p.dh; i < p.dw + p.dh; i += 12) {
+                        ctx.beginPath();
+                        ctx.moveTo(o.x + i, o.y);
+                        ctx.lineTo(o.x + i + p.dh, o.y + p.dh);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+                
+                // 外框
+                ctx.strokeStyle = p.c;
+                ctx.setLineDash([]);
+                ctx.lineWidth = 2;
+                ctx.strokeRect(o.x, o.y, p.dw, p.dh);
+                
+                // 縫份線
+                ctx.strokeStyle = '#718096';
+                ctx.setLineDash([3, 3]);
+                ctx.lineWidth = 1;
+                ctx.strokeRect(o.x + seam * scale, o.y + seam * scale, 
+                              p.dw - seam * 2 * scale, p.dh - seam * 2 * scale);
+                
+                // 標籤 - 更清晰
+                if (p.dw > 50 && p.dh > 30) {
+                    ctx.fillStyle = '#1a202c';
+                    ctx.font = 'bold 11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.n, o.x + p.dw/2, o.y + p.dh/2 - 5);
+                    ctx.fillStyle = '#4a5568';
+                    ctx.font = '9px monospace';
+                    ctx.fillText(`${p.w}×${p.h}`, o.x + p.dw/2, o.y + p.dh/2 + 8);
+                }
+            });
+            
+            // 更新信息
+            const tl = (th - padding * 2) / scale;
+            const m = (tl / 100).toFixed(2);
+            const texts = i18n[app.lang];
+            document.getElementById('layoutInfo').textContent = 
+                `${texts.length}: ${Math.ceil(tl)}${app.unit} | ${texts.usage}: ${m}m | ${parts.length}${texts.pieces}`;
+        }
+
+        function closeLayoutModal() {
+            document.getElementById('layoutModal').classList.add('hidden');
+        }
+
+        function shareLayout() {
+            const c = document.getElementById('layoutCanvas');
+            c.toBlob(blob => {
+                const file = new File([blob], 'SofaCut-Layout.png', {type: 'image/png'});
+                if (navigator.share) {
+                    navigator.share({
+                        files: [file],
+                        title: 'SofaCut Layout',
+                        text: `SofaCut Layout - ${new Date().toLocaleDateString()}`
+                    });
+                } else {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `SofaCut-${Date.now()}.png`;
+                    a.click();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
